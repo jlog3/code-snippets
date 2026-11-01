@@ -1,0 +1,9 @@
+{
+  "name": "adaptive-a11y-kit",
+  "version": "1.0.0",
+  "description": "An accessibility questionnaire and the code that tailors an interface to each person's answers.",
+  "type": "module",
+  "files": ["profile.mjs", "questionnaire.mjs", "dialog.mjs", "settings.mjs", "adaptive.css", "demo.html", "README.md"],
+  "scripts": { "test": "node kit.test.mjs" },
+  "devDependencies": { "jsdom": "^24.0.0" }
+}

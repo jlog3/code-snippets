@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adaptive accessibility demo</title>
+<!-- The pre-paint script: paste the output of prepaintScript() here as an
+     inline script, before the stylesheet, so the first paint is already
+     right. The demo loads it from a module instead, which is fine for a demo
+     but would flash on a real site. -->
+<script type="module">
+  import { configure, prepaintScript } from "./profile.mjs";
+  configure({ storageKey: "demo-a11y" });
+  new Function(prepaintScript())();
+</script>
+<link rel="stylesheet" href="./adaptive.css">
+<style>
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); line-height: 1.5; }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 120px; }
+  h1 { font-size: 1.6rem; margin: 0 0 6px; }
+  .card { background: var(--surface-1); border: 2px solid var(--border); border-radius: 12px; padding: 16px; margin: 16px 0; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .btn { font: inherit; font-weight: 700; padding: 8px 16px; border-radius: 8px; border: 2px solid var(--border-strong); background: var(--surface-2); color: var(--fg); cursor: pointer; }
+  .btn.primary { background: var(--accent-info); color: var(--on-accent); border-color: var(--fg); }
+  .pill { display: inline-flex; gap: 6px; align-items: center; padding: 2px 10px; border-radius: 999px; border: 2px solid var(--border); font-size: .8125rem; }
+  code { background: var(--surface-3); padding: 1px 6px; border-radius: 4px; }
+  .spinner { width: 40px; height: 40px; border-radius: 50%; border: 5px solid var(--surface-3); border-top-color: var(--accent-info); animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #attrs { font-family: ui-monospace, monospace; font-size: .8125rem; white-space: pre-wrap; }
+  .a11y-fab { position: fixed; right: 16px; bottom: 16px; z-index: 50; }
+</style>
+</head>
+<body>
+<a class="a11y-sr-only" href="#main">Skip to content</a>
+<main id="main">
+  <h1>One app, tailored to each person</h1>
+  <p>Answer the questions, then watch this page change. Everything here is driven by the attributes on <code>&lt;html&gt;</code>.</p>
+
+  <section class="card" aria-labelledby="h-now">
+    <h2 id="h-now">What the page is doing for you now</h2>
+    <div id="attrs" aria-live="off"></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-try">
+    <h2 id="h-try">Try it</h2>
+    <div class="row" role="toolbar" aria-label="Demo actions">
+      <button class="btn primary" id="save">Save</button>
+      <button class="btn" id="warn">Something to check</button>
+      <button class="btn" id="del">Delete everything</button>
+      <button class="btn" id="tick">Start a counter</button>
+    </div>
+    <p class="row" style="margin-top:12px">
+      <span class="spinner" aria-hidden="true"></span>
+      <span>This spins, unless motion is reduced.</span>
+    </p>
+    <p id="autoplay"></p>
+  </section>
+
+  <section class="card" aria-labelledby="h-levels">
+    <h2 id="h-levels">Controls that appear as you grow</h2>
+    <div class="row">
+      <button class="btn">Basic control</button>
+      <button class="btn" data-min-level="growing">Common control</button>
+      <button class="btn" data-min-level="everything">Expert control</button>
+      <button class="btn a11y-advanced">Advanced (hidden by Simpler)</button>
+    </div>
+    <p>Nothing is ever locked. Choose "Everything" in settings to show all.</p>
+  </section>
+
+  <section class="card" aria-labelledby="h-set">
+    <h2 id="h-set">Accessibility settings</h2>
+    <div id="settings"></div>
+  </section>
+</main>
+<button class="btn primary a11y-fab" id="open-q" aria-label="Accessibility: answer the questions again"><span aria-hidden="true">&#9855;</span> Accessibility</button>
+
+<script type="module">
+  import P from "./profile.mjs";
+  import { openQuestionnaire } from "./dialog.mjs";
+  import { renderSettings } from "./settings.mjs";
+
+  P.configure({ storageKey: "demo-a11y" });
+  P.applyNow();
+
+  const announcer = P.createAnnouncer(document);
+  const fb = P.createFeedback({ announcer });
+
+  function showAttrs() {
+    const el = document.documentElement;
+    const lines = Array.from(el.attributes).filter((a) => a.name.startsWith("data-")).map((a) => `${a.name}="${a.value}"`);
+    document.getElementById("attrs").textContent = lines.join("\n") || "(standard settings)";
+    document.getElementById("autoplay").textContent = P.mayStartOnItsOwn()
+      ? "A real app could start a preview sound here on its own."
+      : "Nothing starts on its own: you asked for that. Press something to hear it.";
+  }
+  window.addEventListener("a11y:change", showAttrs);
+  showAttrs();
+
+  const settings = renderSettings(document.getElementById("settings"), {
+    onAnswerAgain: () => openQuestionnaire({ appName: "Demo", reconfigure: true, onDone: () => settings.refresh() }),
+  });
+
+  document.getElementById("save").onclick = () => fb.notify({ text: "Your work is saved.", kind: "success" });
+  document.getElementById("warn").onclick = () => fb.notify({ text: "Two items have the same name.", kind: "warning" });
+  document.getElementById("del").onclick = async () => {
+    P.swallowRepeatClick(document);
+    if (await P.confirmDestructive("Delete everything? This cannot be undone.")) fb.notify({ text: "Deleted. Press Undo to bring it back.", kind: "info" });
+  };
+  let n = 0, t = null;
+  document.getElementById("tick").onclick = (e) => {
+    if (t) { clearInterval(t); t = null; e.target.textContent = "Start a counter"; announcer.say("Counter stopped at " + n); return; }
+    e.target.textContent = "Stop the counter";
+    // Ticks go to the stream channel: the latest value, at most every 1.5 s.
+    t = setInterval(() => announcer.stream("Count " + (++n)), 200);
+  };
+  document.getElementById("open-q").onclick = () =>
+    openQuestionnaire({ appName: "Demo", reconfigure: P.hasAnswered(), onDone: () => settings.refresh() });
+
+  if (!P.hasAnswered()) openQuestionnaire({ appName: "Demo", onDone: () => settings.refresh() });
+</script>
+</body>
+</html>

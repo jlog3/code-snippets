@@ -1,0 +1,241 @@
+/* ==========================================================================
+   adaptive.css — what the profile's attributes on <html> do.
+   Plain CSS, no build step. Use these tokens in your own styles (or map
+   them onto yours) and everything below adapts with them.
+
+   Attributes set by profile.mjs:
+     data-touch="comfortable"   data-motion="reduce"   data-density="simple"
+     data-confirm="always"      data-calm="on"         data-dwell="long"
+     data-theme="light|dark"    data-text="large|xlarge"
+     data-contrast="high"       data-palette="tritan|vivid"
+     data-reading="easy"        data-captions="on"
+     data-level="basics|growing|everything"
+   ========================================================================== */
+
+/* ── 1. Tokens. The standard palette IS colour-blind safe (Wong / Okabe-Ito),
+   so no one has to find a setting to be able to use the app. Each accent
+   also has a glyph and a word wherever it carries meaning: colour is never
+   the only cue (WCAG 1.4.1). ──────────────────────────────────────────── */
+:root {
+  --bg: #0a0a10;
+  --fg: #e2e0dd;
+  --surface-1: #101018;
+  --surface-2: #181822;
+  --surface-3: #232330;
+  --border: #ffffff40;
+  --border-strong: #ffffff66;
+
+  --accent-info:    #56B4E9;  /* sky blue    ◆ */
+  --accent-success: #009E73;  /* bluish green ✓ */
+  --accent-warning: #F0E442;  /* yellow      ▲ */
+  --accent-danger:  #E69F00;  /* orange      ✕ */
+  --accent-extra:   #CC79A7;  /* reddish purple */
+  --on-accent: #000000;       /* text on an accent background */
+
+  --focus: #56B4E9;
+  --target: 2rem;             /* 32px everyday floor */
+  --target-comfort: 2.75rem;  /* 44px: WCAG 2.5.5, Apple 44pt */
+  --gap-comfort: 8px;
+
+  /* Questionnaire group colours */
+  --q-access: #56B4E9; --q-vision: #56B4E9; --q-hearing: #E69F00; --q-motor: #2FBF8F;
+  --q-comfort: #CC79A7; --q-done: #2FBF8F; --q-exp: #B39DFF; --q-custom: #F0E442; --q-ink: #000;
+
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light dark;
+}
+
+/* Light: follows the device unless the person chose a theme. */
+html[data-theme="light"] {
+  --bg: #fafaf7; --fg: #15151a; --surface-1: #f1f1ee; --surface-2: #e6e6e1; --surface-3: #d4d4cf;
+  --border: #00000066; --border-strong: #000000aa;
+  --accent-info: #005a8c; --accent-success: #007850; --accent-warning: #876200; --accent-danger: #a34c00; --accent-extra: #8a3f70;
+  --on-accent: #ffffff; --focus: #005a8c;
+  --q-access: #0072B2; --q-vision: #0072B2; --q-hearing: #A85E00; --q-motor: #00785A; --q-comfort: #A3457C;
+  --q-done: #00785A; --q-exp: #5B3FB8; --q-custom: #7A6C00; --q-ink: #fff;
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-theme]) {
+    --bg: #fafaf7; --fg: #15151a; --surface-1: #f1f1ee; --surface-2: #e6e6e1; --surface-3: #d4d4cf;
+    --border: #00000066; --border-strong: #000000aa;
+    --accent-info: #005a8c; --accent-success: #007850; --accent-warning: #876200; --accent-danger: #a34c00; --accent-extra: #8a3f70;
+    --on-accent: #ffffff; --focus: #005a8c;
+    --q-access: #0072B2; --q-vision: #0072B2; --q-hearing: #A85E00; --q-motor: #00785A; --q-comfort: #A3457C;
+    --q-done: #00785A; --q-exp: #5B3FB8; --q-custom: #7A6C00; --q-ink: #fff;
+  }
+}
+
+/* ── 2. Palettes ─────────────────────────────────────────────────────────── */
+/* Blue-yellow (tritan) safe: leans on the red-green axis, which tritan
+   vision sees normally. */
+html[data-palette="tritan"] {
+  --accent-info: #B0BEC5; --accent-success: #009E73; --accent-warning: #CC79A7; --accent-danger: #D55E00; --accent-extra: #EE7733;
+  --focus: #B0BEC5;
+  --q-access: #66CCEE; --q-vision: #66CCEE; --q-hearing: #EE7733; --q-motor: #33AA55; --q-comfort: #F781BF; --q-custom: #CCBB44;
+}
+html[data-palette="tritan"][data-theme="light"] {
+  --accent-info: #455A64; --accent-success: #006A4E; --accent-warning: #934A7C; --accent-danger: #9C4500; --accent-extra: #A84600;
+  --focus: #455A64; --on-accent: #fff;
+  --q-access: #1F6F8B; --q-vision: #1F6F8B; --q-hearing: #A84600; --q-motor: #1E7A3C; --q-comfort: #A8336F; --q-custom: #6E6400;
+}
+@media (prefers-color-scheme: light) {
+  html[data-palette="tritan"]:not([data-theme]) {
+    --accent-info: #455A64; --accent-success: #006A4E; --accent-warning: #934A7C; --accent-danger: #9C4500; --accent-extra: #A84600;
+    --focus: #455A64; --on-accent: #fff;
+    --q-access: #1F6F8B; --q-vision: #1F6F8B; --q-hearing: #A84600; --q-motor: #1E7A3C; --q-comfort: #A8336F; --q-custom: #6E6400;
+  }
+}
+/* Vivid: opted out of colour-blind safety, on purpose, but never out of
+   readability: the light theme gets darker versions of the same hues. */
+html[data-palette="vivid"] {
+  --accent-info: #4dc8ff; --accent-success: #4dffa8; --accent-warning: #ffd24d; --accent-danger: #ff5a4d; --accent-extra: #c98aff;
+}
+html[data-palette="vivid"][data-theme="light"] {
+  --accent-info: #0068a8; --accent-success: #00703f; --accent-warning: #7a5c00; --accent-danger: #c4261b; --accent-extra: #7b3fb8;
+}
+@media (prefers-color-scheme: light) {
+  html[data-palette="vivid"]:not([data-theme]) {
+    --accent-info: #0068a8; --accent-success: #00703f; --accent-warning: #7a5c00; --accent-danger: #c4261b; --accent-extra: #7b3fb8;
+  }
+}
+
+/* ── 3. Contrast ──────────────────────────────────────────────────────────
+   High contrast sets the text AND every surface together. Setting only the
+   text colour (as an earlier version did) turned text white on the light
+   panels of a device in light mode: unreadable, for exactly the person who
+   asked for more contrast. It follows the theme: black on white in light,
+   white on black in dark. */
+html[data-contrast="high"] {
+  --bg: #000000; --fg: #ffffff; --surface-1: #000000; --surface-2: #0e0e0e; --surface-3: #1c1c1c;
+  --border: #ffffffaa; --border-strong: #ffffff;
+}
+html[data-contrast="high"][data-theme="light"] {
+  --bg: #ffffff; --fg: #000000; --surface-1: #ffffff; --surface-2: #f2f2f2; --surface-3: #e2e2e2;
+  --border: #000000cc; --border-strong: #000000;
+}
+@media (prefers-color-scheme: light) {
+  html[data-contrast="high"]:not([data-theme]) {
+    --bg: #ffffff; --fg: #000000; --surface-1: #ffffff; --surface-2: #f2f2f2; --surface-3: #e2e2e2;
+    --border: #000000cc; --border-strong: #000000;
+  }
+}
+html[data-contrast="high"] button, html[data-contrast="high"] input,
+html[data-contrast="high"] select, html[data-contrast="high"] textarea { border: 2px solid var(--border-strong); }
+@media (forced-colors: active) {
+  *:focus-visible { outline: 3px solid Highlight !important; }
+}
+
+/* ── 4. Text size and reading face. Everything in rem, so these and the
+   browser's own font setting scale every label (WCAG 1.4.4). ──────────── */
+html[data-text="large"]  { font-size: 112.5%; } /* 18px */
+html[data-text="xlarge"] { font-size: 137.5%; } /* 22px */
+html[data-reading="easy"] body {
+  font-family: "Atkinson Hyperlegible", "OpenDyslexic", var(--font);
+  letter-spacing: 0.02em; word-spacing: 0.08em; line-height: 1.7;
+}
+
+/* ── 5. Targets. Every control 44 x 44 with space between. ─────────────── */
+button, [role="button"], input[type="button"], input[type="submit"], select { min-height: var(--target); }
+html[data-touch="comfortable"] :is(button, [role="button"], a, select, input, textarea, summary) {
+  min-height: var(--target-comfort);
+}
+html[data-touch="comfortable"] :is(button, [role="button"], input[type="checkbox"], input[type="radio"]) {
+  min-width: var(--target-comfort);
+}
+html[data-touch="comfortable"] :is([role="toolbar"], .toolbar) > * + * { margin-inline-start: var(--gap-comfort); }
+
+/* ── 6. Motion. The OS setting and the app's own switch, both. ─────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
+html[data-motion="reduce"] *, html[data-motion="reduce"] *::before, html[data-motion="reduce"] *::after {
+  animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important;
+}
+
+/* ── 7. Density and level. Mark controls in your markup:
+     class="a11y-advanced"           hidden under "Simpler interface"
+     data-min-level="growing"        hidden at the basics level
+     data-min-level="everything"     hidden below everything
+   Hidden is never gone: keep each one reachable by search or "Show all". ── */
+html[data-density="simple"] .a11y-advanced { display: none !important; }
+html[data-level="basics"] [data-min-level="growing"],
+html[data-level="basics"] [data-min-level="everything"],
+html[data-level="growing"] [data-min-level="everything"] { display: none !important; }
+
+/* Captions-only elements: visible text for things that otherwise only make sound. */
+.a11y-caption-only { display: none; }
+html[data-captions="on"] .a11y-caption-only { display: revert; }
+
+/* ── 8. Focus, always visible and thicker when it matters most. ────────── */
+:focus { outline: none; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; box-shadow: 0 0 0 5px #00000080; }
+html[data-contrast="high"] :focus-visible, html[data-touch="comfortable"] :focus-visible { outline-width: 4px; outline-offset: 3px; }
+
+[hidden] { display: none !important; }
+.a11y-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* ── 9. The caption box from createFeedback(): glyph + word + text. ─────── */
+.a11y-caption {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+  max-width: min(720px, 92vw); padding: 10px 18px; border-radius: 8px;
+  background: #000000eb; color: #fff; font-weight: 700; line-height: 1.4; z-index: 9000;
+  border: 3px solid var(--accent-info); pointer-events: none; text-align: center;
+}
+.a11y-caption[data-kind="success"] { border-color: var(--accent-success); }
+.a11y-caption[data-kind="warning"] { border-color: var(--accent-warning); border-style: dashed; }
+.a11y-caption[data-kind="error"]   { border-color: var(--accent-danger); border-width: 4px; }
+@media (max-width: 640px) { .a11y-caption { top: 12px; bottom: auto; } }
+
+/* ── 10. The questionnaire. ──────────────────────────────────────────────── */
+.q-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.92); z-index: 9500; display: flex; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; }
+.q-dialog { background: var(--surface-1); color: var(--fg); border: 2px solid var(--border); border-top: 8px solid var(--t); border-radius: 16px; padding: clamp(20px, 4vw, 36px); width: 100%; max-width: 680px; max-height: 92vh; overflow-y: auto; font-family: var(--font); }
+.q-dialog h1 { font-size: 1.35rem; margin: 0 0 12px; line-height: 1.25; }
+.q-dialog p { line-height: 1.6; margin: 0 0 16px; }
+.q-step { display: flex; align-items: center; gap: 10px; font-size: .75rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--t); }
+.q-map { list-style: none; display: flex; gap: 6px; padding: 0; margin: 0 0 20px; }
+.q-map li { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; border: 2px dashed var(--t); color: var(--t); font-size: 12px; font-weight: 900; opacity: .7; }
+.q-map li[data-state="now"] { width: 28px; height: 28px; border-style: solid; border-width: 3px; opacity: 1; }
+.q-map li[data-state="done"] { background: var(--t); color: var(--q-ink); border-style: solid; opacity: 1; }
+.q-card { display: flex; gap: 12px; align-items: flex-start; text-align: start; width: 100%; padding: 14px 16px; border-radius: 10px; background: var(--surface-2); color: var(--fg); border: 2px solid var(--border); border-inline-start: 6px solid var(--t); font: inherit; cursor: pointer; min-height: var(--target-comfort); }
+.q-card > span { display: grid; gap: 4px; }
+.q-card > span > span { font-size: .875rem; opacity: .85; line-height: 1.5; }
+.q-card > svg { color: var(--t); flex: none; margin-top: 2px; }
+.q-card:hover { background: var(--surface-3); }
+.q-options, .q-areas { display: grid; gap: 10px; margin-bottom: 16px; }
+.q-areas { grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+.q-yesno { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); margin-bottom: 20px; }
+.q-answer { border-inline-start-width: 2px; }
+.q-box { flex: none; width: 24px; height: 24px; border-radius: 6px; border: 2px solid var(--border-strong); display: grid; place-items: center; font-weight: 900; }
+.q-option[aria-pressed="true"] { border-color: var(--t); background: color-mix(in srgb, var(--t) 18%, var(--surface-2)); }
+.q-option[aria-pressed="true"] .q-box { background: var(--t); border-color: var(--t); color: var(--q-ink); }
+.q-groups { list-style: none; padding: 0; margin: 0 0 12px; display: grid; gap: 8px; }
+.q-groups li { display: flex; gap: 10px; align-items: baseline; border-inline-start: 4px solid var(--t); padding-inline-start: 12px; }
+.q-groups li svg { color: var(--t); align-self: center; }
+.q-groups strong { flex: 0 0 6.5em; }
+.q-small { font-size: .8125rem; opacity: .85; }
+.q-summary { list-style: none; padding: 0; display: grid; gap: 8px; margin: 0 0 20px; }
+.q-summary li { padding: 10px 14px; background: var(--surface-2); border-inline-start: 6px solid var(--q-done); border-radius: 8px; }
+.q-summary li::before { content: "\2713  "; font-weight: 900; }
+.q-level input { width: 22px; height: 22px; margin-top: 2px; accent-color: var(--t); flex: none; }
+.q-level:has(input:checked) { border-color: var(--t); box-shadow: 0 0 0 2px var(--t); }
+.q-level[data-pips="1"] { border-width: 2px; } .q-level[data-pips="2"] { border-width: 3px; } .q-level[data-pips="3"] { border-width: 4px; }
+.q-level[data-pips="0"] { border-style: dashed; }
+.q-pips { display: flex; gap: 3px; font-weight: 900; }
+.q-pips i { width: 10px; height: 10px; border: 2px solid var(--t); border-radius: 2px; }
+.q-pips i[data-on="true"] { background: var(--t); }
+.q-bar { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; border-top: 1px solid var(--border); padding-top: 16px; position: sticky; bottom: 0; background: var(--surface-1); }
+.q-btn { padding: 10px 18px; border-radius: 8px; border: 2px solid var(--border-strong); background: transparent; color: var(--fg); font: inherit; font-weight: 700; cursor: pointer; min-height: var(--target-comfort); }
+.q-primary { background: var(--accent-info); color: var(--on-accent); border-color: var(--fg); }
+
+/* ── 11. The settings panel. ─────────────────────────────────────────────── */
+.s-group { border: 2px solid var(--border); border-radius: 10px; padding: 12px 16px; margin: 0 0 16px; }
+.s-group legend { font-weight: 800; padding: 0 6px; }
+.s-row { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; padding: 8px 0; }
+.s-row label { display: grid; gap: 2px; flex: 1 1 240px; }
+.s-row label span { font-size: .875rem; opacity: .85; }
+.s-row input[type="checkbox"] { width: 22px; height: 22px; margin-top: 2px; }
+.s-src { font-weight: 700; font-size: .75rem !important; }
+.s-select select { min-width: 220px; }
+.s-auto, .s-again { font: inherit; padding: 6px 12px; border-radius: 8px; border: 2px solid var(--border-strong); background: transparent; color: var(--fg); cursor: pointer; min-height: var(--target-comfort); }
+
+html[data-motion="reduce"] .q-card, html[data-motion="reduce"] .q-btn { transition: none !important; }
